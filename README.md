@@ -33,8 +33,9 @@
 # Клонируйте репозиторий
 git clone https://github.com/ваш-username/my-api-testing-project.git
 ```
-# Перейдите в папку проекта
-```cd my-api-testing-project```
+ Перейдите в папку проекта
+```cd my-api-testing-project
+```
 ### Шаг 2: Установка зависимостей
 Откройте файл package.json и проверьте раздел dependencies:
 ```
