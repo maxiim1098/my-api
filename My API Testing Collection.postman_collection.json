@@ -1,0 +1,928 @@
+{
+	"info": {
+		"_postman_id": "c763c438-8323-48b4-8c68-ae7687135ecd",
+		"name": "My API Testing Collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "33791589"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Базовые проверки статуса кода\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"// Проверка времени ответа\r",
+									"pm.test(\"Response time is less than 500ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+									"});\r",
+									"\r",
+									"// Проверка что Content-Type есть\r",
+									"pm.test(\"Content-Type is present\", function () {\r",
+									"    pm.response.to.have.header(\"Content-Type\");\r",
+									"});\r",
+									"\r",
+									"// Проверка структуры ответа - есть ли токены\r",
+									"pm.test(\"Login returns auth token\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    pm.expect(responseData).to.have.property('access_token');\r",
+									"    pm.expect(responseData).to.have.property('refresh_token');\r",
+									"    pm.expect(responseData.access_token).to.be.a('string');\r",
+									"});\r",
+									"\r",
+									"// Сохранение токенов в переменные окружения\r",
+									"pm.test(\"Set environment variables\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    pm.environment.set(\"auth_token\", responseData.access_token);\r",
+									"    pm.environment.set(\"refresh_token\", responseData.refresh_token);\r",
+									"});\r",
+									"\r",
+									"// проверка что токен сохранился\r",
+									"pm.test(\"Token was saved successfully\", function () {\r",
+									"    const savedToken = pm.environment.get(\"auth_token\");\r",
+									"    pm.expect(savedToken).to.not.be.empty;\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"packages": {},
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"{{admin_email}}\",\r\n    \"password\": \"{{admin_password}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Проверка статуса\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"// Проверка времени\r",
+									"pm.test(\"Response time is acceptable\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+									"});\r",
+									"\r",
+									"// Проверка что вернулся новый access_token\r",
+									"pm.test(\"Returns new access token\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    pm.expect(responseData).to.have.property('access_token');\r",
+									"});\r",
+									"\r",
+									"// Обновляем access_token\r",
+									"if (pm.response.code === 200) {\r",
+									"    const responseData = pm.response.json();\r",
+									"    pm.environment.set(\"auth_token\", responseData.access_token);\r",
+									"    \r",
+									"    pm.test(\"Token was refreshed\", function () {\r",
+									"        pm.expect(pm.environment.get(\"auth_token\")).to.not.be.empty;\r",
+									"    });\r",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"refresh_token\": \"{{refresh_token}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/refresh",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"refresh"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Проверка статуса\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"// Проверка что logout прошел успешно\r",
+									"pm.test(\"Logout successful\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    pm.expect(responseData).to.have.property('message');\r",
+									"});\r",
+									"\r",
+									"// Очищаем токены\r",
+									"pm.environment.unset(\"auth_token\");\r",
+									"pm.environment.unset(\"refresh_token\");\r",
+									"\r",
+									"// Проверяем что токены очистились\r",
+									"pm.test(\"Tokens were cleared\", function () {\r",
+									"    pm.expect(pm.environment.get(\"auth_token\")).to.be.undefined;\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/auth/logout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Get All Users",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Проверка статуса\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"// Проверка времени\r",
+									"pm.test(\"Response time is less than 500ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+									"});\r",
+									"\r",
+									"// Проверка структуры ответа с пагинацией\r",
+									"pm.test(\"Response has pagination structure\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    pm.expect(responseData).to.have.property('data');\r",
+									"    pm.expect(responseData).to.have.property('page');\r",
+									"    pm.expect(responseData).to.have.property('limit');\r",
+									"    pm.expect(responseData).to.have.property('total');\r",
+									"});\r",
+									"\r",
+									"// Проверка что data является массивом\r",
+									"pm.test(\"Data is an array\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    pm.expect(Array.isArray(responseData.data)).to.be.true;\r",
+									"});\r",
+									"\r",
+									"// Проверка структуры каждого пользователя в массиве\r",
+									"pm.test(\"Each user has correct structure\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    if (responseData.data.length > 0) {\r",
+									"        const firstUser = responseData.data[0];\r",
+									"        pm.expect(firstUser).to.have.property('id');\r",
+									"        pm.expect(firstUser).to.have.property('name');\r",
+									"        pm.expect(firstUser).to.have.property('email');\r",
+									"    }\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/users?page=1&limit=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Проверка статуса\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"// Проверка структуры пользователя\r",
+									"pm.test(\"User has correct structure\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    pm.expect(responseData).to.have.property('id');\r",
+									"    pm.expect(responseData).to.have.property('name');\r",
+									"    pm.expect(responseData).to.have.property('email');\r",
+									"    pm.expect(responseData).to.have.property('createdAt');\r",
+									"});\r",
+									"\r",
+									"// Проверка что вернулся правильный пользователь\r",
+									"pm.test(\"Correct user ID returned\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    const expectedUserId = pm.environment.get(\"user_id\");\r",
+									"    pm.expect(responseData.id).to.equal(expectedUserId);\r",
+									"});\r",
+									"\r",
+									"// Проверка что email имеет правильный формат\r",
+									"pm.test(\"Email format is valid\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    const emailRegex = /\\S+@\\S+\\.\\S+/;\r",
+									"    pm.expect(emailRegex.test(responseData.email)).to.be.true;\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/users/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{user_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Проверка что пользователь создан (статус 201)\r",
+									"pm.test(\"Status code is 201 - Created\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"// Проверка структуры созданного пользователя\r",
+									"pm.test(\"Created user has correct structure\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    pm.expect(responseData).to.have.property('id');\r",
+									"    pm.expect(responseData).to.have.property('name');\r",
+									"    pm.expect(responseData).to.have.property('email');\r",
+									"    pm.expect(responseData).to.have.property('createdAt');\r",
+									"});\r",
+									"\r",
+									"// Сохраняем ID созданного пользователя для будущих запросов\r",
+									"const responseData = pm.response.json();\r",
+									"pm.environment.set(\"user_id\", responseData.id);\r",
+									"\r",
+									"// Проверка что ID сохранился\r",
+									"pm.test(\"User ID was saved\", function () {\r",
+									"    pm.expect(pm.environment.get(\"user_id\")).to.not.be.empty;\r",
+									"});\r",
+									"\r",
+									"// Проверка что данные совпадают с отправленными\r",
+									"pm.test(\"User data matches request\", function () {\r",
+									"    pm.expect(responseData.name).to.equal(\"Новый пользователь\");\r",
+									"    pm.expect(responseData.email).to.equal(\"new@example.com\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Новый пользователь\",\r\n    \"email\": \"new@example.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Проверка статуса\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"// Проверка структуры обновленного пользователя\r",
+									"pm.test(\"Updated user has correct structure\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    pm.expect(responseData).to.have.property('id');\r",
+									"    pm.expect(responseData).to.have.property('name');\r",
+									"    pm.expect(responseData).to.have.property('email');\r",
+									"});\r",
+									"\r",
+									"// Проверка что данные обновились\r",
+									"pm.test(\"User data was updated\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    pm.expect(responseData.name).to.equal(\"Обновленное имя\");\r",
+									"    pm.expect(responseData.email).to.equal(\"updated@example.com\");\r",
+									"});\r",
+									"\r",
+									"// Проверка что ID остался тем же\r",
+									"pm.test(\"User ID remains the same\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    const originalUserId = pm.environment.get(\"user_id\");\r",
+									"    pm.expect(responseData.id).to.equal(originalUserId);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Обновленное имя\",\r\n    \"email\": \"updated@example.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{user_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Проверка статуса\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"// Проверка сообщения об успешном удалении\r",
+									"pm.test(\"Delete confirmation message\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    pm.expect(responseData).to.have.property('message');\r",
+									"    pm.expect(responseData.message).to.include('deleted');\r",
+									"});\r",
+									"\r",
+									"// Очищаем переменную user_id\r",
+									"pm.environment.unset(\"user_id\");\r",
+									"\r",
+									"// Проверяем что переменная очистилась\r",
+									"pm.test(\"User ID variable was cleared\", function () {\r",
+									"    pm.expect(pm.environment.get(\"user_id\")).to.be.undefined;\r",
+									"});\r",
+									"\r",
+									"// Дополнительная проверка - пытаемся получить удаленного пользователя\r",
+									"pm.test(\"User is really deleted\", function () {\r",
+									"    // Эта проверка просто для демонстрации логики\r",
+									"    pm.expect(pm.response.code).to.equal(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/users/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{user_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							"// Автоматическая подстановка токена для всех запросов\r",
+							"const token = pm.environment.get(\"auth_token\");\r",
+							"\r",
+							"if (token) {\r",
+							"    // Добавляем заголовок Authorization с токеном\r",
+							"    pm.request.headers.add({\r",
+							"        key: \"Authorization\",\r",
+							"        value: \"Bearer \" + token\r",
+							"    });\r",
+							"} else {\r",
+							"    // Если токена нет, выводим предупреждение\r",
+							"    console.log(\"Warning: No auth token found\");\r",
+							"}"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Products",
+			"item": [
+				{
+					"name": "Get Products",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Проверка статуса\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"// Проверка что ответ является массивом\r",
+									"pm.test(\"Response is an array\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    pm.expect(Array.isArray(responseData)).to.be.true;\r",
+									"});\r",
+									"\r",
+									"// Проверка структуры продуктов\r",
+									"pm.test(\"Products have correct structure\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    if (responseData.length > 0) {\r",
+									"        const firstProduct = responseData[0];\r",
+									"        pm.expect(firstProduct).to.have.property('id');\r",
+									"        pm.expect(firstProduct).to.have.property('name');\r",
+									"        pm.expect(firstProduct).to.have.property('price');\r",
+									"    }\r",
+									"});\r",
+									"\r",
+									"// Проверка фильтрации по наличию на складе\r",
+									"pm.test(\"Products in stock filter works\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    responseData.forEach(product => {\r",
+									"        pm.expect(product.inStock).to.be.true;\r",
+									"    });\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/products?inStock=true",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"products"
+							],
+							"query": [
+								{
+									"key": "inStock",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Подстановка токена для этого запроса\r",
+									"const token = pm.environment.get(\"auth_token\");\r",
+									"if (token) {\r",
+									"    pm.request.headers.add({\r",
+									"        key: \"Authorization\",\r",
+									"        value: \"Bearer \" + token\r",
+									"    });\r",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Проверка статуса\r",
+									"pm.test(\"Status code is 201 - Created\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"// Проверка структуры продукта\r",
+									"pm.test(\"Product has correct structure\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    pm.expect(responseData).to.have.property('id');\r",
+									"    pm.expect(responseData).to.have.property('name');\r",
+									"    pm.expect(responseData).to.have.property('price');\r",
+									"    pm.expect(responseData).to.have.property('inStock');\r",
+									"});\r",
+									"\r",
+									"// Сохраняем ID продукта\r",
+									"const responseData = pm.response.json();\r",
+									"pm.environment.set(\"product_id\", responseData.id);\r",
+									"\r",
+									"// Проверка что данные совпадают\r",
+									"pm.test(\"Product data matches request\", function () {\r",
+									"    pm.expect(responseData.name).to.equal(\"Новый продукт\");\r",
+									"    pm.expect(responseData.price).to.equal(1000);\r",
+									"    pm.expect(responseData.inStock).to.be.true;\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Новый продукт\",\r\n    \"price\": 1000\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/products",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"products"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Orders",
+			"item": [
+				{
+					"name": "Create Order",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Проверка статуса\r",
+									"pm.test(\"Status code is 201 - Created\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"// Проверка структуры заказа\r",
+									"pm.test(\"Order has correct structure\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    pm.expect(responseData).to.have.property('id');\r",
+									"    pm.expect(responseData).to.have.property('userId');\r",
+									"    pm.expect(responseData).to.have.property('status');\r",
+									"    pm.expect(responseData).to.have.property('createdAt');\r",
+									"});\r",
+									"\r",
+									"// Сохраняем ID заказа\r",
+									"const responseData = pm.response.json();\r",
+									"pm.environment.set(\"order_id\", responseData.id);\r",
+									"\r",
+									"// Проверка начального статуса заказа\r",
+									"pm.test(\"Order has initial status\", function () {\r",
+									"    pm.expect(responseData.status).to.equal(\"created\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/orders",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Orders",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Проверка статуса\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"// Проверка что ответ является массивом\r",
+									"pm.test(\"Response is an array\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    pm.expect(Array.isArray(responseData)).to.be.true;\r",
+									"});\r",
+									"\r",
+									"// Проверка структуры заказов (если они есть)\r",
+									"pm.test(\"Orders have correct structure\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    if (responseData.length > 0) {\r",
+									"        const firstOrder = responseData[0];\r",
+									"        pm.expect(firstOrder).to.have.property('id');\r",
+									"        pm.expect(firstOrder).to.have.property('userId');\r",
+									"        pm.expect(firstOrder).to.have.property('status');\r",
+									"        pm.expect(firstOrder).to.have.property('createdAt');\r",
+									"    }\r",
+									"});\r",
+									"\r",
+									"// Проверка что все заказы принадлежат правильному пользователю\r",
+									"pm.test(\"All orders belong to correct user\", function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    const expectedUserId = pm.environment.get(\"user_id\");\r",
+									"    \r",
+									"    responseData.forEach(order => {\r",
+									"        pm.expect(order.userId).to.equal(expectedUserId);\r",
+									"    });\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/orders/user/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"orders",
+								"user",
+								"{{user_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							"// Автоматическая подстановка токена для заказов\r",
+							"const token = pm.environment.get(\"auth_token\");\r",
+							"if (token) {\r",
+							"    pm.request.headers.add({\r",
+							"        key: \"Authorization\",\r",
+							"        value: \"Bearer \" + token\r",
+							"    });\r",
+							"} else {\r",
+							"    console.log(\"Токен не найден. Возможно, нужно сначала выполнить Login.\");\r",
+							"}"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "admin_email",
+			"value": ""
+		},
+		{
+			"key": "admin_password",
+			"value": ""
+		},
+		{
+			"value": ""
+		}
+	]
+}
