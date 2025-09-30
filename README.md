@@ -109,7 +109,7 @@ admin_password	admin123
 #### 1. Папка: Authentication
 Запрос: Login (POST /api/auth/login)
 
-text
+
 ``` bash
 ✅ Ожидаемый результат:
 - Status: 200 OK
@@ -120,7 +120,6 @@ text
 
 Запрос: Refresh Token (POST /api/auth/refresh)
 
-text
 ``` bash
 ✅ Ожидаемый результат:
 - Status: 200 OK
@@ -128,8 +127,8 @@ text
 - Старый токен заменен новым
 ```
 Запрос: Logout (POST /api/auth/logout)
+
 ``` bash
-text
 ✅ Ожидаемый результат:
 - Status: 200 OK
 - Токены очищены из переменных
@@ -139,7 +138,6 @@ text
 
 Запрос: Create User (POST /api/users)
 
-text
 ``` bash
 ✅ Ожидаемый результат:
 - Status: 201 Created
@@ -147,9 +145,9 @@ text
 - user_id сохранен в переменные
 - Все поля пользователя валидны
 ```
+
 Запрос: Get All Users (GET /api/users?page=1&limit=10)
 
-text
 ``` bash
 ✅ Ожидаемый результат:
 - Status: 200 OK
@@ -157,9 +155,9 @@ text
 - Структура пагинации корректна
 - Каждый пользователь имеет правильную структуру
 ```
+
 Запрос: Get User by ID (GET /api/users/{{user_id}})
 
-text
 ``` bash
 ✅ Ожидаемый результат:
 - Status: 200 OK
@@ -167,9 +165,9 @@ text
 - ID соответствует запрошенному
 - Email имеет валидный формат
 ```
+
 Запрос: Update User (PUT /api/users/{{user_id}})
 
-text
 ``` bash
 ✅ Ожидаемый результат:
 - Status: 200 OK
@@ -177,9 +175,9 @@ text
 - ID остался прежним
 - Новые значения соответствуют отправленным
 ```
+
 Запрос: Delete User (DELETE /api/users/{{user_id}})
 
-text
 ``` bash
 ✅ Ожидаемый результат:
 - Status: 200 OK
@@ -191,7 +189,6 @@ text
 
 Запрос: Get Products (GET /api/products?inStock=true)
 
-text
 ``` bash
 ✅ Ожидаемый результат:
 - Status: 200 OK
@@ -199,9 +196,9 @@ text
 - Все продукты в наличии (inStock: true)
 - Каждый продукт имеет правильную структуру
 ```
+
 Запрос: Create Product (POST /api/products)
 
-text
 ``` bash
 ✅ Ожидаемый результат:
 - Status: 201 Created
@@ -214,7 +211,6 @@ text
 
 Запрос: Create Order (POST /api/orders)
 
-text
 ``` bash
 ✅ Ожидаемый результат:
 - Status: 201 Created
@@ -222,9 +218,9 @@ text
 - order_id сохранен в переменные
 - Статус заказа: "created"
 ```
+
 Запрос: Get User Orders (GET /api/orders/user/{{user_id}})
 
-text
 ``` bash
 ✅ Ожидаемый результат:
 - Status: 200 OK
@@ -235,6 +231,7 @@ text
 
 #### Комплексный сценарий тестирования
 Для полной проверки выполните тесты в следующем порядке:
+
 ``` bash
 Authentication → Login
 
