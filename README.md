@@ -256,7 +256,7 @@ Authentication → Logout
 
 ***
 
-📁 **Структура проекта**
+## Структура проекта
 text
 ``` bash
 my-api-testing-project/
