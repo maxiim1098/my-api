@@ -48,16 +48,22 @@ json
 ```
 Установите необходимые библиотеки:
 
-bash
 # Установите все зависимости из package.json
-```npm install```
+``` bash
+npm install
+```
 
 # ИЛИ установите библиотеки вручную:
-```npm install express uuid
-Шаг 3: Запуск сервера```
+``` bash
+npm install express uuid
+```
+
+### Шаг 3: Запуск сервера
 
 # Запустите сервер
-```node server.js```
+``` bash
+node server.js
+```
 Ожидаемый результат:
 
 text
