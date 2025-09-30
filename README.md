@@ -31,11 +31,11 @@
 
 ```bash
 # Клонируйте репозиторий
-git clone https://github.com/ваш-username/my-api-testing-project.git
+git clone https://github.com/maxiim1098/my-api.git
 ```
  Перейдите в папку проекта
 ```bash
-cd my-api-testing-project
+cd my-api
 ```
 ### Шаг 2: Установка зависимостей
 Откройте файл package.json и проверьте раздел dependencies:
