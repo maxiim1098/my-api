@@ -32,29 +32,30 @@
 ```bash
 # Клонируйте репозиторий
 git clone https://github.com/ваш-username/my-api-testing-project.git
-
+```
 # Перейдите в папку проекта
-cd my-api-testing-project
-Шаг 2: Установка зависимостей
+```cd my-api-testing-project```
+### Шаг 2: Установка зависимостей
 Откройте файл package.json и проверьте раздел dependencies:
-
+```
 json
 "dependencies": {
   "express": "^4.18.2",
   "uuid": "^9.0.0"
 }
+```
 Установите необходимые библиотеки:
 
 bash
 # Установите все зависимости из package.json
-npm install
+```npm install```
 
 # ИЛИ установите библиотеки вручную:
-npm install express uuid
-Шаг 3: Запуск сервера
-bash
+```npm install express uuid
+Шаг 3: Запуск сервера```
+
 # Запустите сервер
-node server.js
+```node server.js```
 Ожидаемый результат:
 
 text
